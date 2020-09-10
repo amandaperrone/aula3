@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.example.aula3.model.Cliente;
+import com.example.aula5.model.Cliente;
 
 import org.springframework.stereotype.Component;
 

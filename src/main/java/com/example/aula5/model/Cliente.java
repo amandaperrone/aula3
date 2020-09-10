@@ -1,4 +1,4 @@
-package com.example.aula3.model;
+package com.example.aula5.model;
 
 public class Cliente {
     

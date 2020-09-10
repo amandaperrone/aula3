@@ -1,8 +1,8 @@
-package com.example.aula3.controller;
+package com.example.aula5.controller;
 
 import java.util.List;
 
-import com.example.aula3.model.Cliente;
+import com.example.aula5.model.Cliente;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
