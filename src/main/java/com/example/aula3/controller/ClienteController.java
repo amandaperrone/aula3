@@ -1,10 +1,13 @@
 package com.example.aula3.controller;
 
-import java.net.URI;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import com.example.aula3.dto.ClienteDTO;
 import com.example.aula3.model.Cliente;
 import com.example.aula3.repository.ClienteRepository;
+import com.example.aula3.service.ClienteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 // O Spring por meio da anotação controla o objeto
 @RestController
@@ -25,6 +30,9 @@ public class ClienteController {
     // Spring irá injetar o objeto que gerencia
     @Autowired
     private ClienteRepository repository;
+
+    @Autowired
+    private ClienteService service;
 
     @GetMapping()
     public List<Cliente> getClientes(){
@@ -45,12 +53,18 @@ public class ClienteController {
 
     @PostMapping()
     // @RequestBody pega os dados que o postman enviar e guarda
-    public ResponseEntity<Void> salvar(@RequestBody Cliente cliente){
+    // HttpServletRequest
+    public ResponseEntity<Void> salvar( @RequestBody ClienteDTO clienteDTO, 
+                                        HttpServletRequest request, 
+                                        UriComponentsBuilder builder){
+
+        Cliente cliente = service.fromDTO(clienteDTO);
         cliente = repository.save(cliente);
+        // request.getRequestURI() pega o endereço que mandou
+        UriComponents uriComponents = builder.path(request.getRequestURI() + "/" + cliente.getCodigo())
+        .build();
 
-        URI uri = URI.create("http://localhost:8080/clientes/" + cliente.getCodigo());
-
-        return ResponseEntity.created(uri).build(); //.build() constrói a resposta
+        return ResponseEntity.created(uriComponents.toUri()).build(); //.build() constrói a resposta
     }
 
     @DeleteMapping("/{codigo}")
@@ -69,8 +83,10 @@ public class ClienteController {
 
     @PutMapping("/{codigo}")
     // O corpo é void pois não retorna nada
-    public ResponseEntity<Cliente> atualizar(@PathVariable int codigo, @RequestBody Cliente cliente){
+    public ResponseEntity<Cliente> atualizar(   @PathVariable int codigo, 
+                                                @RequestBody ClienteDTO clienteDTO){
         if (repository.getClienteByCodigo(codigo) != null){
+            Cliente cliente = service.fromDTO(clienteDTO); // transforma o cliente em clienteDTO
             cliente.setCodigo(codigo);
             cliente = repository.update(cliente);
             return ResponseEntity.ok(cliente);
