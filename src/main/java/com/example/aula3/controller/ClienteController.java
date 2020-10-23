@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.example.aula3.dto.ClienteDTO;
 import com.example.aula3.model.Cliente;
-import com.example.aula3.repository.ClienteRepository;
 import com.example.aula3.service.ClienteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,42 +26,31 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/clientes") //Indica que tudo é /clientes
 public class ClienteController {
 
-    // Spring irá injetar o objeto que gerencia
-    @Autowired
-    private ClienteRepository repository;
-
+    
     @Autowired
     private ClienteService service;
 
     @GetMapping()
     public List<Cliente> getClientes(){
-        return repository.getAllClientes();
+        return service.getAllClientes();
     }
 
     @GetMapping("/{codigo}")
     public ResponseEntity<Cliente> getCliente(@PathVariable int codigo){
-        Cliente cliente = repository.getClienteByCodigo(codigo);
-
-        if (cliente!=null){
-            return ResponseEntity.ok(cliente); // Só o 200 não precisa de build()
-        }
-        else{
-            return ResponseEntity.notFound().build();
-        }
+        
+        Cliente cliente = service.getClienteByCodigo(codigo);
+        return ResponseEntity.ok(cliente); // Só o 200 não precisa de build()
     }
 
     @PostMapping()
     // @RequestBody pega os dados que o postman enviar e guarda
     // HttpServletRequest
-    public ResponseEntity<Void> salvar( @RequestBody ClienteDTO clienteDTO, 
-                                        HttpServletRequest request, 
-                                        UriComponentsBuilder builder){
+    public ResponseEntity<Void> salvar(@RequestBody ClienteDTO clienteDTO, HttpServletRequest request,UriComponentsBuilder builder){
 
         Cliente cliente = service.fromDTO(clienteDTO);
-        cliente = repository.save(cliente);
+        cliente = service.save(cliente);
         // request.getRequestURI() pega o endereço que mandou
-        UriComponents uriComponents = builder.path(request.getRequestURI() + "/" + cliente.getCodigo())
-        .build();
+        UriComponents uriComponents = builder.path(request.getRequestURI() + "/" + cliente.getCodigo()).build();
 
         return ResponseEntity.created(uriComponents.toUri()).build(); //.build() constrói a resposta
     }
@@ -70,30 +58,21 @@ public class ClienteController {
     @DeleteMapping("/{codigo}")
     // O corpo é void pois não retorna nada
     public ResponseEntity<Void> remover(@PathVariable int codigo){
-        Cliente cliente = repository.getClienteByCodigo(codigo);
+        
+        service.removeByCodigo(codigo);
+        return ResponseEntity.noContent().build();
 
-        if (cliente!=null){
-            repository.remove(cliente); //ctrl em cima do remove e criar método
-            return ResponseEntity.noContent().build();
-        }
-        else{
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @PutMapping("/{codigo}")
     // O corpo é void pois não retorna nada
-    public ResponseEntity<Cliente> atualizar(   @PathVariable int codigo, 
-                                                @RequestBody ClienteDTO clienteDTO){
-        if (repository.getClienteByCodigo(codigo) != null){
-            Cliente cliente = service.fromDTO(clienteDTO); // transforma o cliente em clienteDTO
-            cliente.setCodigo(codigo);
-            cliente = repository.update(cliente);
-            return ResponseEntity.ok(cliente);
-        }
-        else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Cliente> atualizar(@PathVariable int codigo, @RequestBody ClienteDTO clienteDTO){
+
+        Cliente cliente = service.fromDTO(clienteDTO); // transforma o cliente em clienteDTO
+        cliente.setCodigo(codigo);
+        cliente = service.update(cliente);
+        return ResponseEntity.ok(cliente);
+       
     }
 }
 
