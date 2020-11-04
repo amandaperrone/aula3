@@ -6,7 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.example.aula3.dto.ClienteDTO;
 import com.example.aula3.model.Cliente;
+import com.example.aula3.model.Pedido;
 import com.example.aula3.service.ClienteService;
+import com.example.aula3.service.PedidoService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +30,20 @@ public class ClienteController {
 
     
     @Autowired
-    private ClienteService service;
+    private ClienteService clienteService;
+
+    @Autowired
+    private PedidoService pedidoService;
 
     @GetMapping()
     public List<Cliente> getClientes(){
-        return service.getAllClientes();
+        return clienteService.getAllClientes();
     }
 
     @GetMapping("/{codigo}")
     public ResponseEntity<Cliente> getCliente(@PathVariable int codigo){
         
-        Cliente cliente = service.getClienteByCodigo(codigo);
+        Cliente cliente = clienteService.getClienteByCodigo(codigo);
         return ResponseEntity.ok(cliente); // Só o 200 não precisa de build()
     }
 
@@ -47,8 +52,8 @@ public class ClienteController {
     // HttpServletRequest
     public ResponseEntity<Void> salvar(@RequestBody ClienteDTO clienteDTO, HttpServletRequest request,UriComponentsBuilder builder){
 
-        Cliente cliente = service.fromDTO(clienteDTO);
-        cliente = service.save(cliente);
+        Cliente cliente = clienteService.fromDTO(clienteDTO);
+        cliente = clienteService.save(cliente);
         // request.getRequestURI() pega o endereço que mandou
         UriComponents uriComponents = builder.path(request.getRequestURI() + "/" + cliente.getCodigo()).build();
 
@@ -59,7 +64,7 @@ public class ClienteController {
     // O corpo é void pois não retorna nada
     public ResponseEntity<Void> remover(@PathVariable int codigo){
         
-        service.removeByCodigo(codigo);
+        clienteService.removeByCodigo(codigo);
         return ResponseEntity.noContent().build();
 
     }
@@ -68,11 +73,19 @@ public class ClienteController {
     // O corpo é void pois não retorna nada
     public ResponseEntity<Cliente> atualizar(@PathVariable int codigo, @RequestBody ClienteDTO clienteDTO){
 
-        Cliente cliente = service.fromDTO(clienteDTO); // transforma o cliente em clienteDTO
+        Cliente cliente = clienteService.fromDTO(clienteDTO); // transforma o cliente em clienteDTO
         cliente.setCodigo(codigo);
-        cliente = service.update(cliente);
+        cliente = clienteService.update(cliente);
         return ResponseEntity.ok(cliente);
        
+    }
+
+    @PostMapping("{id}/pedidos")
+    public ResponseEntity<Void> salvar(@PathVariable int id, @RequestBody Pedido pedido, HttpServletRequest request,UriComponentsBuilder builder){
+        pedido = pedidoService.salvar(pedido, id);
+        UriComponents uriComponents = builder.path(request.getRequestURI() + "/" + pedido.getNumero()).build();
+
+        return ResponseEntity.created(uriComponents.toUri()).build(); 
     }
 }
 
