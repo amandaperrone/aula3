@@ -32,11 +32,11 @@ public class ItemPedido {
         this.numero = numero;
     }
 
-    public double getPreco() {
+    public double getPrecoUnitario() {
         return precoUnitario;
     }
 
-    public void setPreco(double preco) {
+    public void setPrecoUnitario(double preco) {
         this.precoUnitario = preco;
     }
 
