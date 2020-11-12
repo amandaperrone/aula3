@@ -3,8 +3,10 @@ package com.example.aula3.controller;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import com.example.aula3.dto.ClienteDTO;
+import com.example.aula3.dto.PedidoDTO;
 import com.example.aula3.model.Cliente;
 import com.example.aula3.model.Pedido;
 import com.example.aula3.service.ClienteService;
@@ -50,7 +52,8 @@ public class ClienteController {
     @PostMapping()
     // @RequestBody pega os dados que o postman enviar e guarda
     // HttpServletRequest
-    public ResponseEntity<Void> salvar(@RequestBody ClienteDTO clienteDTO, HttpServletRequest request,UriComponentsBuilder builder){
+    // @Valid precisa ser colocado para que as constraints sejam utilizadas
+    public ResponseEntity<Void> salvar(@Valid @RequestBody ClienteDTO clienteDTO, HttpServletRequest request,UriComponentsBuilder builder){
 
         Cliente cliente = clienteService.fromDTO(clienteDTO);
         cliente = clienteService.save(cliente);
@@ -86,6 +89,13 @@ public class ClienteController {
         UriComponents uriComponents = builder.path(request.getRequestURI() + "/" + pedido.getNumero()).build();
 
         return ResponseEntity.created(uriComponents.toUri()).build(); 
+    }
+
+    @GetMapping("{id}/pedidos")
+    public List<PedidoDTO> getPedidosCliente(@PathVariable int id){
+        
+        Cliente cliente = clienteService.getClienteByCodigo(id);
+        return pedidoService.toListDTO(cliente.getPedidos());
     }
 }
 
