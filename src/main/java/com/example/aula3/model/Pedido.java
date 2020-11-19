@@ -1,15 +1,23 @@
 package com.example.aula3.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonGetter;
 
 public class Pedido {
     
     private long numero;
     private String descricao;
+
+    @JsonFormat(pattern = "dd/MM/yyyy@HH:mm:ss")
     private LocalDateTime dataPedido;
+
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dataEntrega;
+
     private Cliente cliente;
     private boolean pedidoFechado;
     private ArrayList<ItemPedido> itens = new ArrayList<ItemPedido>();
@@ -95,6 +103,14 @@ public class Pedido {
         this.itens = itens;
     }
 
+    public LocalDate getDataEntrega() {
+        return dataEntrega;
+    }
+
+    public void setDataEntrega(LocalDate dataEntrega) {
+        this.dataEntrega = dataEntrega;
+    }
+    
     // ----------------- TO STRING -----------------
     @Override
     public String toString() {
